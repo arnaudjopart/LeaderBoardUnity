@@ -4,15 +4,7 @@ var _ = require('underscore');
 var bodyParser = require ('body-parser');
 var PORT = process.env.PORT||3000;
 
-var Sequelize = require('sequelize');
-var sequelize = New Sequelize(undefined, undefined, undefined,{
-  'dialect':'sqlite',
-  'storage':'basic-sqlite-database.sqlite'
-});
-
-sequelize.sync().then(function(){
-  console.log('Everything is synced.');
-});
+var db = require('./db.js');
 
 var scoreNextId = 1;
 
@@ -26,33 +18,71 @@ var middleware = require('./middleware.js');
 //app.use(middleware.logger);
 
 app.get('/leaderboard', function(req,res){
-  res.json(leaderboard);
+  db.leaderboard.findAll().then(function(entries){
+    if(entries){
+      res.json(entries);
+    }
+  },function(e){
+    res.status(404).send(e);
+  });
 });
 
+app.get('/leaderboard/:playerName',function(req,res){
+  var name = req.params.playerName;
+  var score;
+  console.log("Looking for "+name);
+  db.leaderboard.findOne({where:{playerName:name}}).then(function(entry){
+    if(entry){
+      score =parseInt(entry.toJSON().score);
+      console.log(score);
+      res.json(entry.toJSON());
+      db.leaderboard.count().then(function(c){
+        console.log("number of players: "+c);
+      },function(e){
+
+      });
+      db.leaderboard.count({where:["score>?",score]}).then(function(c){
+        console.log("higher score: "+c);
+      })
+    }else{
+      res.status(400).send();
+
+    }
+  },function(e){
+    res.status(404).send(e);
+  });
+
+});
 app.get('/leaderboard/:id', function(req,res){
   var leaderboardId = parseInt(req.params.id,10);
-  var matchedEntry =_.findWhere(leaderboard,{id:leaderboardId});
-
-  if(matchedEntry){
-    console.log("found id");
-    res.json(matchedEntry);
-  }else{
-    res.status(404).send();
-  }
-
+  db.leaderboard.findById(leaderboardId).then(function(entry){
+    if(entry){
+      res.json(entry.toJSON());
+    }else{
+      res.status(400).send();
+    }
+  },function(e){
+    res.status(400).send(e);
+  });
 });
 
 app.post('/leaderboard',function(req,res){
   var body = _.pick(req.body,'playerName','score');
 
-  if(!_.isString(body.playerName)||body.playerName.trim().length===0){
-    return res.status(400).send();
-  }
-  body.id = scoreNextId;
-  scoreNextId++;
-  leaderboard.push(body);
-  //console.log(body.playerName);
-  res.json(body);
+  db.leaderboard.create(body).then(function(entry){
+    res.json(entry.toJSON());
+
+  }, function(e){
+    res.status(400).json(e);
+  });
+  // if(!_.isString(body.playerName)||body.playerName.trim().length===0){
+  //   return res.status(400).send();
+  // }
+  // body.id = scoreNextId;
+  // scoreNextId++;
+  // leaderboard.push(body);
+  // //console.log(body.playerName);
+  // res.json(body);
 
 });
 
@@ -62,7 +92,8 @@ app.post('/leaderboard',function(req,res){
 
 
 //app.use(express.static(__dirname+"/public"));
-
-app.listen(PORT,function(){
-  console.log("Express Server started on "+PORT+"!");
+db.sequelize.sync().then(function(){
+  app.listen(PORT,function(){
+    console.log("Express Server started on "+PORT+"!");
+  });
 });
