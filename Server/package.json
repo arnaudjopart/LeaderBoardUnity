@@ -1,7 +1,7 @@
 {
   "name": "leaderboardunity",
   "version": "1.0.0",
-  "description": "",
+  "description": "Leaderboard project for Unity. Written in Node.js",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,8 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.13.2",
-    "body-parser":"^4.13.3",
-    "underscore":"^1.8.3"
-    }
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "underscore": "^1.8.3"
+  }
 }
