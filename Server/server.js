@@ -14,6 +14,10 @@ var leaderboard = [{
   id:3,
   playerName:"Hadrien",
   score:250
+},{
+  id:4,
+  playerName:"Raphael",
+  score:150
 }];
 
 var middleware = require('./middleware.js');
