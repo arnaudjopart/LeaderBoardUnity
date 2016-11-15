@@ -1,6 +1,11 @@
 var express = require('express');
 var app = express();
+var bodyParser = require ('body-parser');
 var PORT = process.env.PORT||3000;
+
+var scoreNextId = 1;
+
+app.use(bodyParser.json());
 
 var leaderboard = [{
   id:1,
@@ -45,6 +50,16 @@ app.get('/leaderboard/:id', function(req,res){
   }else{
     //res.status(404).send();
   }
+
+});
+
+app.post('/leaderboard',function(req,res){
+  var body = req.body;
+  body.id = scoreNextId;
+  scoreNextId++;
+  leaderboard.push(body);
+  //console.log(body.playerName);
+  res.json(body);
 
 });
 
