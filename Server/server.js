@@ -4,6 +4,16 @@ var _ = require('underscore');
 var bodyParser = require ('body-parser');
 var PORT = process.env.PORT||3000;
 
+var Sequelize = require('sequelize');
+var sequelize = New Sequelize(undefined, undefined, undefined,{
+  'dialect':'sqlite',
+  'storage':'basic-sqlite-database.sqlite'
+});
+
+sequelize.sync().then(function(){
+  console.log('Everything is synced.');
+});
+
 var scoreNextId = 1;
 
 app.use(bodyParser.json());
