@@ -51,7 +51,7 @@ public class WebServer : MonoBehaviour {
         
         form.AddField("message", json);
 
-        UnityWebRequest www = UnityWebRequest.Post("http://localhost:3000/leaderboard/", form);// "{\"playerName\":\"Arnaud\",\"score\":\"500\"}");
+        UnityWebRequest www = UnityWebRequest.Post("https://arcane-inlet-79757.herokuapp.com/", form);// "{\"playerName\":\"Arnaud\",\"score\":\"500\"}");
 
         yield return www.Send();
 
