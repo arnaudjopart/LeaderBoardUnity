@@ -42,7 +42,8 @@ public class WebServer : MonoBehaviour {
             Debug.Log(www.error);
         }else
         {
-            Debug.Log(www.downloadHandler.text);
+            var N = JSON.Parse(www.downloadHandler.text);
+            print(N.Count);
         }
     }
     public void PostScore(int _score)
@@ -65,10 +66,7 @@ public class WebServer : MonoBehaviour {
 
         UnityWebRequest www = UnityWebRequest.Post(m_currentUrl+"/leaderboard/", form);// "{\"playerName\":\"Arnaud\",\"score\":\"500\"}");
 
-        yield return www.Send();
-
-
-        
+        yield return www.Send();        
 
         if (www.isError)
         {
@@ -76,7 +74,8 @@ public class WebServer : MonoBehaviour {
         }
         else
         {
-            print(www.downloadHandler.text);
+            var N = JSON.Parse(www.downloadHandler.text);
+            print(N["playerName"]);
         }
     }
 
