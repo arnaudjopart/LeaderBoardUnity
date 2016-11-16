@@ -26,6 +26,18 @@ app.get('/leaderboard', function(req,res){
   });
 });
 
+app.get('/leaderboard-top5',function(req,res){
+  db.leaderboard.findAll({order:[['score','DESC']],limit:5}).then(function(entries){
+    if(entries){
+      res.json(entries);
+    }else{
+      res.status(400).send()
+    }
+  },function(e){
+    res.status(404).send(e);
+  });
+
+});
 app.get('/leaderboard/:playerName',function(req,res){
   var name = req.params.playerName;
   var matchedEntry;

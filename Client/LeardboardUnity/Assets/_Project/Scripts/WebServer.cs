@@ -6,7 +6,9 @@ using System.Collections.Generic;
 
 public class WebServer : MonoBehaviour {
 
-    public string m_serverAdress;
+    public bool m_localTest;
+    public string m_localUrl;
+    public string m_deploymentUrl;
     
 	// Use this for initialization
 	void Start () {
@@ -15,17 +17,23 @@ public class WebServer : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+        if (m_localTest)
+        {
+            m_currentUrl = m_localUrl;
+        }else
+        {
+            m_currentUrl = m_deploymentUrl;
+        }
 	}
 
-    public void WebRequest()
+    public void GetPlayerInfo(string _playerName)
     {
-        StartCoroutine(GetData());
+        StartCoroutine(GetData("/leaderboard/"+_playerName));
     }
 
-    IEnumerator GetData()
+    IEnumerator GetData(string _data)
     {
-        UnityWebRequest www = UnityWebRequest.Get(m_serverAdress);
+        UnityWebRequest www = UnityWebRequest.Get(m_currentUrl+_data);
 
         yield return www.Send();
 
@@ -41,17 +49,21 @@ public class WebServer : MonoBehaviour {
     {
         StartCoroutine(PostData(_score));
     }
-
+    public void GetTop5()
+    {
+        StartCoroutine(GetData("/leaderboard-top5"));
+    }
+    
     IEnumerator PostData(int _data)
     {
-        string json = "{\"playerName\":\"Sam\",\"score\":\"10\",\"hack\":\"Some bad code\"}";
+        string json = "{\"playerName\":\"Bob\",\"score\":\"10\",\"hack\":\"Some bad code\"}";
         string jsonDatatoSend = JsonUtility.ToJson(json);
 
         WWWForm form = new WWWForm();
         
         form.AddField("message", json);
 
-        UnityWebRequest www = UnityWebRequest.Post("https://arcane-inlet-79757.herokuapp.com/", form);// "{\"playerName\":\"Arnaud\",\"score\":\"500\"}");
+        UnityWebRequest www = UnityWebRequest.Post(m_currentUrl+"/leaderboard/", form);// "{\"playerName\":\"Arnaud\",\"score\":\"500\"}");
 
         yield return www.Send();
 
@@ -67,4 +79,6 @@ public class WebServer : MonoBehaviour {
             print(www.downloadHandler.text);
         }
     }
+
+    private string m_currentUrl;
 }   
