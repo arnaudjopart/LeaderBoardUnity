@@ -30,10 +30,12 @@ app.get('/leaderboard', function(req,res){
 app.get('/leaderboard/:playerName',function(req,res){
   var name = req.params.playerName;
   var score;
+
   console.log("Looking for "+name);
   db.leaderboard.findOne({where:{playerName:name}}).then(function(entry){
     if(entry){
       score =parseInt(entry.toJSON().score);
+
       console.log(score);
       res.json(entry.toJSON());
       db.leaderboard.count().then(function(c){
@@ -43,6 +45,8 @@ app.get('/leaderboard/:playerName',function(req,res){
       });
       db.leaderboard.count({where:["score>?",score]}).then(function(c){
         console.log("higher score: "+c);
+        var rank = c+1;
+        console.log(name+" has rank n° "+ rank);
       })
     }else{
       res.status(400).send();
