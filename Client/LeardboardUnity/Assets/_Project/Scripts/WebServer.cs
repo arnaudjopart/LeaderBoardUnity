@@ -43,7 +43,7 @@ public class WebServer : MonoBehaviour {
         }else
         {
             var N = JSON.Parse(www.downloadHandler.text);
-            print(N.Count);
+            print(N);
         }
     }
     public void PostScore(int _score)
@@ -52,9 +52,12 @@ public class WebServer : MonoBehaviour {
     }
     public void GetTop5()
     {
-        StartCoroutine(GetData("/leaderboard-top5"));
+        StartCoroutine(GetData("/leaderboard/top/5"));
     }
-    
+    public void GetLocalLeaderboard(string _playerName)
+    {
+        StartCoroutine(GetData("/leaderboard/local/3/"+_playerName));
+    }
     IEnumerator PostData(int _data)
     {
         string json = "{\"playerName\":\"Bob\",\"score\":\"10\",\"hack\":\"Some bad code\"}";

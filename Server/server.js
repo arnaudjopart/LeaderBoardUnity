@@ -12,10 +12,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 var middleware = require('./middleware.js');
-
-
 //app.use(middleware.logger);
-
 app.get('/leaderboard', function(req,res){
   db.leaderboard.findAll().then(function(entries){
     if(entries){
@@ -40,17 +37,47 @@ app.get('/leaderboard/top/:nb',function(req,res){
 
 });
 
-app.get('/leaderboard/local/:nb',function(req,res){
+app.get('/leaderboard/local/:nb/:playerName',function(req,res){
   var nb = req.params.nb;
-  db.leaderboard.findAll({order:[['score','ASC']],where:["score>?",10],limit:nb}).then(function(entries){
-    if(entries){
-      res.json(entries);
+  var name = req.params.playerName;
+  var data= {};
+  db.leaderboard.findOne({where:{playerName:name}}).then(function(entry){
+
+    if(entry){
+
+      var targetScore = parseInt(entry.toJSON().score,10);
+      console.log(targetScore);
+      db.leaderboard.findAll({order:[['score','ASC']],where:["score>?",targetScore],limit:nb}).then(function(entries){
+        if(entries){
+          data.top = entries;
+          data.player = entry;
+
+
+          db.leaderboard.findAll({order:[['score','DESC']],where:["score<?",targetScore],limit:nb}).then(function(entries){
+            if(entries){
+              data.down=entries;
+              res.json(data);
+            }else{
+              res.status(400).send();
+            };
+          },function(e){
+            res.status(404).send(e);
+          });
+          //res.json(entries);
+        }else{
+          res.status(400).send();
+        };
+      },function(e){
+        res.status(404).send(e);
+      });
     }else{
       res.status(400).send();
-    }
+    };
+
   },function(e){
-    res.status(404).send();
+
   });
+
 });
 app.get('/leaderboard/:playerName',function(req,res){
   var name = req.params.playerName;
