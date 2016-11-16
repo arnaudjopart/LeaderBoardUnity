@@ -9,8 +9,7 @@ var db = require('./db.js');
 var scoreNextId = 1;
 
 app.use(bodyParser.json());
-
-var leaderboard=[];
+app.use(bodyParser.urlencoded({ extended: true }));
 
 var middleware = require('./middleware.js');
 
@@ -29,33 +28,20 @@ app.get('/leaderboard', function(req,res){
 
 app.get('/leaderboard/:playerName',function(req,res){
   var name = req.params.playerName;
-  var score;
+  var matchedEntry;
 
   console.log("Looking for "+name);
   db.leaderboard.findOne({where:{playerName:name}}).then(function(entry){
     if(entry){
-      score =parseInt(entry.toJSON().score);
+      matchedEntry = entry;
 
-      console.log(score);
-      res.json(entry.toJSON());
-      db.leaderboard.count().then(function(c){
-        console.log("number of players: "+c);
-      },function(e){
-
-      });
-      db.leaderboard.count({where:["score>?",score]}).then(function(c){
-        console.log("higher score: "+c);
-        var rank = c+1;
-        console.log(name+" has rank n° "+ rank);
-      })
+      SendData(matchedEntry,res);
     }else{
-      res.status(400).send();
-
+      res.status(404).send();
     }
   },function(e){
     res.status(404).send(e);
   });
-
 });
 app.get('/leaderboard/:id', function(req,res){
   var leaderboardId = parseInt(req.params.id,10);
@@ -71,25 +57,49 @@ app.get('/leaderboard/:id', function(req,res){
 });
 
 app.post('/leaderboard',function(req,res){
-  var body = _.pick(req.body,'playerName','score');
-
+  console.log("Unity data: "+req.body.message);
+  var parse = JSON.parse(req.body.message);
+  console.log(parse);
+  var body = _.pick(parse,'playerName','score');
+  console.log(body);
   db.leaderboard.create(body).then(function(entry){
     res.json(entry.toJSON());
 
   }, function(e){
     res.status(400).json(e);
   });
-  // if(!_.isString(body.playerName)||body.playerName.trim().length===0){
-  //   return res.status(400).send();
-  // }
-  // body.id = scoreNextId;
-  // scoreNextId++;
-  // leaderboard.push(body);
-  // //console.log(body.playerName);
-  // res.json(body);
 
 });
 
+function SendData(entry,res){
+  var score;
+  var nbOfplayers;
+  var rank;
+
+  score =parseInt(entry.toJSON().score);
+  console.log(score);
+  console.log("preparing data...");
+
+  db.leaderboard.count().then(function(c){
+    console.log("number of players: "+c);
+    nbOfplayers = c;
+  },function(e){
+    res.status(400).send();
+  }).then(function(){
+    db.leaderboard.count({where:["score>?",score]}).then(function(c){
+      console.log("higher score: "+c);
+      rank = c+1;
+      //console.log(name+" has rank n° "+ rank);
+      var data = {};
+      data.entry = entry;
+      data.nbOfplayers= nbOfplayers;
+      data.rank = rank;
+      res.json(data);
+    },function(e){
+      res.status(400).send();
+    });
+  });
+}
 // app.get('/about',middleware.requireAuthentication, function(req,res){
 //   res.send("About us");
 // });
