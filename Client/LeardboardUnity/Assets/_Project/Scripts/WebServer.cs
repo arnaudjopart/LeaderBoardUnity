@@ -50,9 +50,9 @@ public class WebServer : MonoBehaviour {
     {
         StartCoroutine(PostData(_score));
     }
-    public void GetTop5()
+    public void GetTop(int _nb)
     {
-        StartCoroutine(GetData("/leaderboard/top/5"));
+        StartCoroutine(GetData("/leaderboard/top/"+_nb));
     }
     public void GetLocalLeaderboard(string _playerName)
     {

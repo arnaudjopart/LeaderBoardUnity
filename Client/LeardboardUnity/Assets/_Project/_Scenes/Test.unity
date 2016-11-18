@@ -497,9 +497,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcabfcca5616fd646a3cab1556cf26ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_localTest: 1
+  m_localTest: 0
   m_localUrl: http://localhost:3000
-  m_deploymentUrl: 
+  m_deploymentUrl: https://arcane-inlet-79757.herokuapp.com
 --- !u!4 &945207002
 Transform:
   m_ObjectHideFlags: 0
